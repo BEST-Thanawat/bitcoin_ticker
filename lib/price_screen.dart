@@ -1,3 +1,4 @@
+import 'package:bitcoin_ticker/networking.dart';
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,6 +8,8 @@ import 'dart:convert';
 import 'dart:io';
 
 const CoinAPI = 'https://rest.coinapi.io/v1/exchangerate/BTC/';
+const CoinAPI2 = 'https://rest.coinapi.io/v1/exchangerate/ETH/';
+const CoinAPI3 = 'https://rest.coinapi.io/v1/exchangerate/LTC/';
 const CoinKEY = '';
 
 class PriceScreen extends StatefulWidget {
@@ -17,9 +20,15 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
 
-  String coinBase = '';
-  String coinQuote = '';
-  double coinRate = 0;
+  String coinBase;
+  String coinQuote;
+  double coinRate;
+  String coinBase2;
+  String coinQuote2;
+  double coinRate2;
+  String coinBase3;
+  String coinQuote3;
+  double coinRate3;
   // List<DropdownMenuItem<String>> androidDropdown() {
   //   return currenciesList.map((cur) {
   //     return new DropdownMenuItem<String>(
@@ -28,24 +37,40 @@ class _PriceScreenState extends State<PriceScreen> {
   //     );
   //   }).toList();
   // }
+  //
+  // Future getData() async {
+  //   var uri = Uri.parse(CoinAPI + selectedCurrency);
+  //   http.Response response = await http.get(uri, headers: {'X-CoinAPI-Key': CoinKEY});
+  //
+  //   if (response.statusCode == 200) {
+  //     String data = response.body;
+  //     return jsonDecode(data);
+  //   } else {
+  //     print(response.statusCode);
+  //   }
+  // }
 
-  Future getData() async {
-    var uri = Uri.parse(CoinAPI + selectedCurrency);
-    http.Response response = await http.get(uri, headers: {'X-CoinAPI-Key': CoinKEY});
+  Future<dynamic> getPrice() async {
+    NetworkHelper networkHelper = NetworkHelper(CoinAPI + selectedCurrency);
+    NetworkHelper networkHelper2 = NetworkHelper(CoinAPI2 + selectedCurrency);
+    NetworkHelper networkHelper3 = NetworkHelper(CoinAPI3 + selectedCurrency);
 
-    if (response.statusCode == 200) {
-      String data = response.body;
-      return jsonDecode(data);
-    } else {
-      print(response.statusCode);
-    }
-  }
+    var currData = await networkHelper.getData();
+    var currData2 = await networkHelper2.getData();
+    var currData3 = await networkHelper3.getData();
 
-  Future<dynamic> getPrice(String currency) async {
-    var currData = await getData();
-    coinBase = currData['asset_id_base'];
-    coinQuote = currData['asset_id_quote'];
-    coinRate = currData['rate'];
+    setState(() {
+      coinBase = currData['asset_id_base'];
+      coinQuote = currData['asset_id_quote'];
+      coinRate = currData['rate'];
+      coinBase2 = currData2['asset_id_base'];
+      coinQuote2 = currData2['asset_id_quote'];
+      coinRate2 = currData2['rate'];
+      coinBase3 = currData3['asset_id_base'];
+      coinQuote3 = currData3['asset_id_quote'];
+      coinRate3 = currData3['rate'];
+    });
+
     return currData;
   }
 
@@ -62,7 +87,7 @@ class _PriceScreenState extends State<PriceScreen> {
         onChanged: (value) async {
           setState(() {
             selectedCurrency = value;
-            getPrice(selectedCurrency);
+            getPrice();
           });
         });
   }
@@ -110,6 +135,48 @@ class _PriceScreenState extends State<PriceScreen> {
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
                   '1 $coinBase = $coinRate$selectedCurrency',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+            child: Card(
+              color: Colors.lightBlueAccent,
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+                child: Text(
+                  '1 $coinBase2 = $coinRate2$selectedCurrency',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+            child: Card(
+              color: Colors.lightBlueAccent,
+              elevation: 5.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+                child: Text(
+                  '1 $coinBase3 = $coinRate3$selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
