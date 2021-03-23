@@ -8,8 +8,8 @@ class NetworkHelper {
 
   final String url;
 
-  Future getData() async {
-    var uri = Uri.parse(url);
+  Future getData(String currency) async {
+    var uri = Uri.parse(url + currency);
     http.Response response = await http.get(uri, headers: {'X-CoinAPI-Key': CoinKEY});
 
     if (response.statusCode == 200) {
