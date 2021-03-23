@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
 
-const CoinAPI = 'https://rest.coinapi.io/v1/exchangerate/BTC/USD';
+const CoinAPI = 'https://rest.coinapi.io/v1/exchangerate/BTC/';
 const CoinKEY = '';
 
 class PriceScreen extends StatefulWidget {
@@ -14,6 +17,9 @@ class PriceScreen extends StatefulWidget {
 class _PriceScreenState extends State<PriceScreen> {
   String selectedCurrency = 'USD';
 
+  String coinBase = '';
+  String coinQuote = '';
+  double coinRate = 0;
   // List<DropdownMenuItem<String>> androidDropdown() {
   //   return currenciesList.map((cur) {
   //     return new DropdownMenuItem<String>(
@@ -22,6 +28,26 @@ class _PriceScreenState extends State<PriceScreen> {
   //     );
   //   }).toList();
   // }
+
+  Future getData() async {
+    var uri = Uri.parse(CoinAPI + selectedCurrency);
+    http.Response response = await http.get(uri, headers: {'X-CoinAPI-Key': CoinKEY});
+
+    if (response.statusCode == 200) {
+      String data = response.body;
+      return jsonDecode(data);
+    } else {
+      print(response.statusCode);
+    }
+  }
+
+  Future<dynamic> getPrice(String currency) async {
+    var currData = await getData();
+    coinBase = currData['asset_id_base'];
+    coinQuote = currData['asset_id_quote'];
+    coinRate = currData['rate'];
+    return currData;
+  }
 
   DropdownButton<String> androidDropdown() {
     return DropdownButton<String>(
@@ -33,9 +59,10 @@ class _PriceScreenState extends State<PriceScreen> {
           );
         }).toList(),
         hint: Text('Please choose a currency'),
-        onChanged: (value) {
+        onChanged: (value) async {
           setState(() {
             selectedCurrency = value;
+            getPrice(selectedCurrency);
           });
         });
   }
@@ -82,7 +109,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ?$selectedCurrency',
+                  '1 $coinBase = $coinRate$selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
